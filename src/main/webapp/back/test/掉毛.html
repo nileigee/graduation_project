@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="container" style="width:400px; height:300px"></div>
+
+<script src="https://webapi.amap.com/maps?v=1.4.0&key=0adb83ce94b8d3ac7383c99ebe898f68&callback=init"/> //这里的key需要换成自己的
+<script>
+function init(){
+    var map = new AMap.Map('container', {
+        center: [114.31, 30.52],
+        zoom: 6
+    });
+    map.plugin(["AMap.ToolBar"], function() {
+        map.addControl(new AMap.ToolBar());
+    });
+
+    <!-- 上面是定位，下面是打上标记 -->
+
+    var marker;
+    var icon = new AMap.Icon({
+        image: 'http://vdata.amap.com/icons/b18/1/2.png',
+        size: new AMap.Size(24, 24)
+    });
+    marker = new AMap.Marker({
+        offset: new AMap.Pixel(-12, -12),
+        zIndex: 101,
+        map: map
+    });
+}
+</script>
+
+</body>
+</html>

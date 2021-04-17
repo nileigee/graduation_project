@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Table数据 上移  下移  置顶</title>
+    <link rel="stylesheet" href="css/table.css">
+    <script type="text/javascript" src="../boot/js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".Up").click(function(){
+                var $tr = $(this).parents("tr");
+                if ($tr.index() != 0) {//判断是否为第一行
+                    var id1=$tr.children("td:first-child").text();//当前序号
+                    var id=$tr.prev().children("td:first-child").text();//前一个序号
+                    $tr.prev().children("td:first-child").text(id1);//交换序号
+                    $tr.children("td:first-child").text(id);
+                    $tr.prev().before($tr);
+                }
+            })
+            //下移
+            var trLength = $(".down").length;
+            $(".down").click(function(){
+                var $tr = $(this).parents("tr");
+                if ($tr.index() != trLength - 1) {//判断是否为最后一行
+                    var id1=$tr.children("td:first-child").text();//当前序号
+                    var id=$tr.next().children("td:first-child").text();//下一行序号
+                    $tr.next().children("td:first-child").text(id1);//交换序号
+                    $tr.children("td:first-child").text(id);
+                    $tr.next().after($tr);
+                }
+            })
+            //置顶
+            $(".top").click(function(){
+                var $tr = $(this).parents("tr");
+                $("tbody tr").each(function(){//遍历tr 把序号加一
+                    var text =Number($(this).children("td:first-child").text());
+                    text=Number(text+1);
+                    $(this).children("td:first-child").text(text);
+                })
+                $tr.fadeOut().fadeIn();
+                $tr.children("td:first-child").text(1)//被置顶行的序号置为一
+                $(".table").prepend($tr);
+                //  $tr.css("color","#f60");
+            })
+        })
+    </script>
+        <style>
+        /* CSS Document */
+        /*格式化样式*/
+        *{margin:0;padding:0}
+        body{font:12px/1.5 Microsoft YaHei,Arial, Helvetica, sans-serif;color:#333;background:#edeff3}
+        table{width:100%; border-collapse:collapse;border:none;border-spacing:0}
+        a{color:#202020;text-decoration:none;cursor: pointer}
+        img{border:none}
+        input{vertical-align:middle;outline:none;font-family:Microsoft YaHei;border:none}
+        input[type="submit"]{cursor:pointer}
+        textarea{outline:none;outline:none;border:solid 1px #e2e2e2;resize:none}
+        ul,ol,dl{list-style:none;}
+        b,em,i,u,strong{font-weight:normal;font-style:normal;text-decoration:none;}
+        h1,h2,h3,h4,h5,h6{font-size:14px;font-weight:normal;}
+
+        /*公共样式*/
+        .fl{float:left;}
+        .fr{float:right;}
+        .clear{clear:both}
+        .bord{border-bottom:solid 2px #f2f2f2}
+        .blueColor {color:#4893cc;}
+
+        /**table样式**/
+        .commonTab {padding: 0 25px; overflow: auto;padding-bottom: 80px;}
+        .commonTab table tr th {background: #eaeaea;border-left: solid 1px #f9f9f9;}
+        .commonTab table tr th {height: 35px; background: #eaeaea;font-weight: 100;font-size: 14px;border-left: solid 1px #f9f9f9;}
+        .marTop20{margin-top:20px}
+        .commonTab table tr td {border-left: solid 1px #f9f9f9;}
+        .commonTab table tr td {padding: 8px 0;font-size: 14px; border: solid 1px #f2f2f2;}
+        .rightSide{margin-left:10px;padding-top:24px;min-height:1000px;}
+        .screen {padding: 20px;}
+        .whiteBg{background:#fff;padding-bottom:70px}
+        </style>
+</head>
+<body>
+<div class="rightSide">
+    <div class="whiteBg">
+        <div class="bord screen">
+
+            <div class="clear"></div>
+        </div>
+        <div class="commonTab marTop20">
+            <table cellpadding="0" cellspacing="0" class="table">
+                <thead>
+                <th>序号</th>
+                <th>名称</th>
+                <th>操作</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td >1</td>
+                    <td>第一个</td>
+                    <td><a class="Up blueColor">上移</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="down blueColor">下移</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="top blueColor">置顶</a></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>第二个</td>
+                    <td><a class="Up blueColor">上移</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="down blueColor">下移</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="top blueColor">置顶</a></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>第三个</td>
+                    <td><a class="Up blueColor">上移</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="down blueColor">下移</a>&nbsp;&nbsp;&nbsp;&nbsp;<a class="top blueColor">置顶</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

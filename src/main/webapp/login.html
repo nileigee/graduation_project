@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>管理员登录</title>
+    <!--更好的响应式支持-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--引入bootstrap核心css文件-->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/boot/css/bootstrap.min.css">
+    <!--引入jqgrid核心css文件-->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/boot/grid/ui.jqgrid-bootstrap.css">
+    <!--引入jQuery核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/js/jquery-3.5.1.min.js"></script>
+    <!--引入jqgrid核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/grid/jquery.jqGrid.min.js"></script>
+    <!--引入jqgrid国际化核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/grid/grid.locale-cn.js"></script>
+    <!--引入bootstrap核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/js/bootstrap.min.js"></script>
+
+
+</head>
+<body>
+<div class="container" style="width: 400px; margin: auto;">
+    <h3 style="text-align: center;">管理员登录</h3>
+    <form class="form-horizontal" style="margin: auto;">
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">用户：</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+            </div>
+        </div>
+        <div class="form-group ">
+            <label for="inputPassword3" class="col-sm-2 control-label">密码：</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control " id="inputPassword3" placeholder="Password">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox"> Remember me
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">Sign in</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- 出错显示的信息框 -->
+    <div class="alert alert-warning alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" >
+            <span>&times;</span></button>
+        <strong>
+        </strong>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nileigee.dao.Line_stopDao">
+    <!--1.根据lineId和stopId查询indexs-->
+    <select id="findIndexByLineIdAndStopId" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select indexs from line_stop
+        where lineId=#{lineId} and stopId=#{stopId}
+    </select>
+    <!--2.根据lineId和stopId改变indexs-->
+    <update id="updateIndexByLineIdAndStopId" parameterType="java.util.Map">
+        update line_stop set indexs=#{indexs}
+        where lineId=#{lineId} and stopId=#{stopId}
+    </update>
+    <!--3.获得最大的index用于站点加入路线-->
+    <select id="findMaxIndex" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select max(lis.indexs) from stopinfo si
+        left join line_stop lis
+        on si.stopId=lis.stopId
+        where lis.lineId=#{lineId}
+    </select>
+    <!--4.站点加入线路-->
+    <insert id="insertStopByLineIdAndStopId" parameterType="java.util.Map">
+        insert into line_stop(lineId,stopId,indexs)
+        values (#{lineId},#{stopId},#{indexs})
+    </insert>
+    <!--5.移出线路-->
+    <delete id="lineMoveStop" parameterType="java.util.Map">
+        delete from line_stop where lineId=#{lineId} and stopId=#{stopId}
+    </delete>
+</mapper>

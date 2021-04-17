@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--引入jQuery核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/js/jquery-3.5.1.min.js"></script>
+    <!--引入jqgrid核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/grid/jquery.jqGrid.min.js"></script>
+    <!--引入jqgrid国际化核心js文件-->
+    <script src="${pageContext.request.contextPath}/boot/grid/grid.locale-cn.js"></script>
+    <style>
+        table.grid {
+            border:1px solid #188ffe;
+            margin:10px;
+        }
+        table.grid th {
+            text-align:center;
+            font-weight:bold;
+            background-color:#188ffe;
+            color:#fff;
+            padding:5px;
+        }
+        table.grid a {
+            padding:0px 5px;
+        }
+        table.grid a:link {
+            text-decoration:none;
+        }
+        table.grid tr td {
+            border-top:1px solid #e2ecff;
+            border-left:1px solid #e2ecff;
+            border-bottom:1px solid #a0cffe;
+            border-right:1px solid #a0cffe;
+            padding:3px 5px;
+        }
+        table.grid tr:nth-child(even) {
+            background-color:#efefef;
+        }
+        .trh {
+            height:0px;
+            overflow:hidden;
+        }
+        .ccup,.ccdown {
+            cursor:pointer;
+        }
+        .opFly {
+            position:absolute;
+            z-index:999;
+            border-style:solid;
+            border-left-color:#eef7fd;
+            border-top-color:#eef7fd;
+            border-right-color:#d3e9fc;
+            border-bottom-color:#d3e9fc;
+            background-color:#deeffc;
+        }
+
+    </style>
+    <script>
+        /*
+ 整个方法说明：
+ 比如将第5行上移到第4行，也就是把这两行交换一下位置。
+ 一、先复制第5行[opOccupy]插入到第3行与第4行之间，表格就多了一行： 1 2 3 5的复制 4 5 6。但复制出来的行[opOccupy]高度为0，所以网页上看不出来多的一行。
+ 二、复制行[opOccupy]的高度慢慢变高，直到正常高度。而本身的第5行高度慢慢变小，直到0，这样就会把夹在中间的第4行慢慢挤下来。
+ 三、再次复制第5行[opFly]，用于浮动起来向上慢慢移动，实现第5行向上移的效果。
+ 四、实际上是3个事件一起进行。
+ */
+
+        $(function() {
+            //给上移下移按钮绑定相应的事件
+            $(".ccup").on("click", moveUp);
+            $(".ccdown").on("click", moveDown);
+        });
+
+        function moveUp() {
+            //上移操作
+
+            var op = $(this).parents("tr").eq(0); //获取上移按钮tr这一级对象
+            if (op.index() > 1) // table 或 tBody 下第一行（标题）的 index是0，第二行index=1才是数据，但第二行本身就在最上面，所以要index大于1才能操作上移
+            {
+                //op是当前行 TR 对象； opFly是op的复制对象,用于移动实现过渡效果； opOccupy也是op的复制对象,用于先在移动后的位置占个空位,再用动画效果展开显示
+                var oheight = op.height();
+                var opFly = op.clone(); //opFly是op的复制对象,用于移动实现过渡效果
+                opFly.addClass("opFly").css("border-width", "2px"); //为了明显，把边框加宽了
+                //opFly对象要浮动起来再移动到指定位置，所以CSS的position:absolute属性要加上。
+                //但加了后单元格TD的宽度与表格的不一致，所以下面代码对每一个TD的宽度重新赋值。
+                opFly.children().each(function(i, n) {
+                    $(n).css("width", op.children().eq(i).width());
+                });
+
+                //因为上面把边框加厚了，所以position:absolute之后的top与left定位要减去边框才能与之前的行位置保持一样。
+                var fbtw = parseInt(opFly[0].style.borderTopWidth.replace(/px/, "")); //本身直接用 opFly.css("border-top-width")可以取值，但IE下只会取到0，所以改用这个方式。
+                if (isNaN(fbtw)) {
+                    fbtw = 0;
+                }
+                var ox = op.position();
+                var opTop = ox.top - fbtw;
+
+                var fblw = parseInt(opFly[0].style.borderLeftWidth.replace(/px/, ""));
+                if (isNaN(fblw)) {
+                    fblw = 0;
+                }
+                var opLeft = ox.left - fblw;
+
+                //上面计算好位置后，这里定义移动层的初始位置
+                opFly.css({
+                    "top": opTop + "px",
+                    "left": opLeft + "px"
+                });
+
+                var trParent = op.parent();
+                trParent.append(opFly); //把复制出来的移动层添加到Table里，这样css样式才不需要重新处理。
+
+                //再复制一个tr行，用于最后显示的行，但开始不显示所以height高度为0，慢慢再展开显示。
+                var opOccupy = op.clone();
+                opOccupy.find("td").css("display", "none"); //特别注意，需要把tr里面的td都不显示，才能把tr的高度设置为0，不然不起作用，一开始就会错误一看到表格多一行数据了。
+                opOccupy.css({
+                    "height": "0px"
+                });
+                op.prev().before(opOccupy); //把复制出来的行移动到目标位置，但一开始height:0是设置为不显示的。
+                op.css("height", oheight);
+                op.find("td").css("display", "none");
+
+                //先取消上移下移按钮的事件，完成移动后再加上。
+                $(".ccup").unbind("click", moveUp);
+                $(".ccdown").unbind("click", moveDown);
+
+                op.animate({
+                    "height": 0
+                }, 1000, function() {
+                    op.remove();
+                }); //点击上移的这一行高度在1秒变成0，完成动画后删除这一行。
+                opOccupy.animate({
+                    "height": oheight
+                }, 1000, function() {
+                    opOccupy.find("td").css({
+                        "display": ""
+                    });
+                }); //新加的目标行的高度在1秒变成正常高度，完成动画后把td显示出来。
+                //以下是移动层，移动到上一个tr的位置，完成后删除移动层，并重新绑定移动事件
+                opFly.animate({
+                    "top": "-=" + oheight + "px"
+                }, 1000, function() {
+                    opFly.remove();
+                    $(".ccup").on("click", moveUp);
+                    $(".ccdown").on("click", moveDown);
+                });
+
+            } else {
+                //alert("已经是第一条了。");
+            }
+        }
+
+        function moveDown(obj) {
+            //说明请参考向上移动，只不过判断是否最后一条与移动的位置改动了一下。
+            var op = $(this).parents("tr").eq(0);
+            var opnext = op.next();
+            if (opnext[0]) {
+                var oheight = op.height();
+                var opFly = op.clone();
+                opFly.addClass("opFly").css("border-width", "2px");
+                opFly.children().each(function(i, n) {
+                    $(n).css("width", op.children().eq(i).width());
+                });
+
+                var fbtw = parseInt(opFly[0].style.borderTopWidth.replace(/px/, ""));
+                if (isNaN(fbtw)) {
+                    fbtw = 0;
+                }
+                var ox = op.position();
+                var opTop = ox.top - fbtw;
+
+                var fblw = parseInt(opFly[0].style.borderLeftWidth.replace(/px/, ""));
+                if (isNaN(fblw)) {
+                    fblw = 0;
+                }
+                var opLeft = ox.left - fblw;
+
+                opFly.css({
+                    "top": opTop + "px",
+                    "left": opLeft + "px"
+                });
+
+                var trParent = op.parent();
+                trParent.append(opFly);
+
+
+                var opOccupy = op.clone();
+
+                opOccupy.find("td").css("display", "none");
+                opOccupy.css({
+                    "height": "0px"
+                });
+                opnext.after(opOccupy);
+
+                op.css("height", oheight);
+                op.find("td").css("display", "none");
+
+                $(".ccup").unbind("click", moveUp);
+                $(".ccdown").unbind("click", moveDown);
+                op.animate({
+                    "height": 0
+                }, 1000, function() {
+                    op.remove();
+                });
+                opOccupy.animate({
+                    "height": oheight
+                }, 1000, function() {
+                    opOccupy.find("td").css({
+                        "display": ""
+                    });
+                });
+                opFly.animate({
+                    "top": "+=" + oheight + "px"
+                }, {
+                    duration: 1000,
+                    complete: function() {
+                        opFly.remove();
+                        $(".ccup").on("click", moveUp);
+                        $(".ccdown").on("click", moveDown);
+                    }
+                });
+
+            } else {
+                //alert("已经是最后一条了。");
+            }
+        }
+    </script>
+</head>
+
+
+<body>
+<div id="Container1" class="Container">
+    <table class="grid" width="500" border="0" cellspacing="0" cellpadding="0">
+        <tbody>
+        <tr>
+            <th style="width:100px;">序号</th>
+            <th>字段中文名</th>
+            <th>调整顺序</th>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td><input type="text" name="textfield" class="editText" id="textfield1" value="AlphaGo"></td>
+            <td><a class="ccup">上移</a><a class="ccdown">下移</a></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td><input type="text" name="textfield" class="editText" id="textfield2" value="BootStrap"></td>
+            <td><a class="ccup">上移</a><a class="ccdown">下移</a></td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td><input type="text" name="textfield" class="editText" id="textfield3" value="Chain"></td>
+            <td><a class="ccup">上移</a><a class="ccdown">下移</a></td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td><input type="text" name="textfield" class="editText" id="textfield4" value="Dream"></td>
+            <td><a class="ccup">上移</a><a class="ccdown">下移</a></td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td><input type="text" name="textfield" class="editText" id="textfield5" value="Exactly"></td>
+            <td><a class="ccup">上移</a><a class="ccdown">下移</a></td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td><input type="text" name="textfield" class="editText" id="textfield6" value="Function"></td>
+            <td><a class="ccup">上移</a><a class="ccdown">下移</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nileigee.dao.StopInfoDao">
+    <resultMap id="stopInfoRM" type="StopInfo" autoMapping="true">
+        <id property="stopId" column="stopId"/>
+        <result property="stopName" column="stopName"/>
+        <result property="stopType" column="stopType"/>
+        <result property="stopLongitude" column="stopLongitude"/>
+        <result property="stopLatitude" column="stopLatitude"/>
+        <result property="stopAddress" column="stopAddress"/>
+        <result property="workerId" column="workerId"/>
+        <result property="stopStatus" column="stopStatus"/>
+        <result property="stopDescribe" column="stopDescribe"/>
+        <association property="workerInfo" javaType="WorkerInfo" autoMapping="true">
+            <id property="workerId" column="workerId"/>
+            <result property="workerName" column="workerName"/>
+            <result property="workerAge" column="workerAge"/>
+            <result property="workerPhone" column="workerPhone"/>
+            <result property="workerType" column="workerType"/>
+            <result property="workerAddress" column="workerAddress"/>
+            <result property="workerStatus" column="workerStatus"/>
+        </association>
+    </resultMap>
+
+    <!--1.列表分页-->
+    <select id="findStopByPage" parameterType="java.lang.Integer" resultMap="stopInfoRM">
+        select * from stopinfo si left join workerinfo wi
+        on si.workerId=wi.workerId
+        LIMIT #{start},#{rows}
+    </select>
+    <!--2.查找数据总量-->
+    <select id="findTotalCount" resultType="java.lang.Integer">
+        select count(*) from stopinfo si left join workerinfo wi
+        on si.workerId=wi.workerId
+    </select>
+    <!--3.保存站点-->
+    <insert id="saveStop" parameterType="StopInfo">
+        insert into stopinfo(stopName,stopType,stopLongitude,stopLatitude,stopAddress,workerId,stopStatus,stopDescribe)
+        values (#{stopName},#{stopType},#{stopLongitude},#{stopLatitude},#{stopAddress},#{workerId},#{stopStatus},#{stopDescribe})
+    </insert>
+    <!--4.根据id查找站点-->
+    <select id="findStopById" parameterType="java.lang.Integer" resultMap="stopInfoRM">
+        select * from stopinfo si left join workerinfo wi
+        on si.workerId=wi.workerId
+        where si.stopId=#{stopId}
+    </select>
+    <!--5.更新站点-->
+    <update id="updateStop" parameterType="StopInfo">
+        update stopinfo set stopName=#{stopName},stopType=#{stopType},stopLongitude=#{stopLongitude},stopLatitude=#{stopLatitude},
+        stopAddress=#{stopAddress},workerId=#{workerId},stopStatus=#{stopStatus},stopDescribe=#{stopDescribe}
+        where stopId=#{stopId}
+    </update>
+    <!--6.删除站点-->
+    <delete id="deleteStop" parameterType="java.lang.Integer">
+        delete from stopinfo where stopId=#{stopId}
+    </delete>
+    <!--7.根据条件查询站点-->
+    <select id="findStopByCondition" parameterType="java.util.Map" resultMap="stopInfoRM">
+        select * from stopinfo si left join workerinfo wi
+        on si.workerId=wi.workerId
+        <where>
+            <if test="stopName!=null and stopName != ''">
+                and si.stopName like concat('%',#{stopName},'%')
+            </if>
+            <if test="stopType!=null and stopType != ''">
+                and si.stopType like concat('%',#{stopType},'%')
+            </if>
+            <if test="stopAddress!=null and stopAddress != ''">
+                and si.stopAddress like concat('%',#{stopAddress},'%')
+            </if>
+        </where> LIMIT #{start},#{rows}
+    </select>
+    <!--8.根据条件查找总数-->
+    <select id="findTotalCountByCondition" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from stopinfo si left join workerinfo wi
+        on si.workerId=wi.workerId
+        <where>
+            <if test="stopName!=null and stopName != ''">
+                and si.stopName like concat('%',#{stopName},'%')
+            </if>
+            <if test="stopType!=null and stopType != ''">
+                and si.stopType like concat('%',#{stopType},'%')
+            </if>
+            <if test="stopAddress!=null and stopAddress != ''">
+                and si.stopAddress like concat('%',#{stopAddress},'%')
+            </if>
+        </where>
+    </select>
+    <!--9.路线站点分配列表-->
+    <select id="findStopsByLineId" parameterType="java.util.Map" resultMap="stopInfoRM">
+        select * from stopinfo si
+        left join workerinfo wi
+        on si.workerId=wi.workerId
+        <where>
+            <if test="stopName!=null and stopName != ''">
+                and si.stopName like concat('%',#{stopName},'%')
+            </if>
+            <if test="stopType!=null and stopType != ''">
+                and si.stopType like concat('%',#{stopType},'%')
+            </if>
+            <if test="stopAddress!=null and stopAddress != ''">
+                and si.stopAddress like concat('%',#{stopAddress},'%')
+            </if>
+                and si.stopId not in(select stopId from line_stop)
+        </where>
+        LIMIT #{start},#{rows}
+    </select>
+    <!--10.路线站点总数-->
+    <select id="findTotalCountByLineId" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from stopinfo si
+        left join workerinfo wi
+        on si.workerId=wi.workerId
+        <where>
+            <if test="stopName!=null and stopName != ''">
+                and si.stopName like concat('%',#{stopName},'%')
+            </if>
+            <if test="stopType!=null and stopType != ''">
+                and si.stopType like concat('%',#{stopType},'%')
+            </if>
+            <if test="stopAddress!=null and stopAddress != ''">
+                and si.stopAddress like concat('%',#{stopAddress},'%')
+            </if>
+            and si.stopId not in(select stopId from line_stop)
+        </where>
+    </select>
+    <!--11.未分页的查询线路上的站点-->
+    <select id="findStopsByLineIdNoPage" parameterType="java.util.Map" resultMap="stopInfoRM">
+        select * from stopinfo si
+        left join workerinfo wi
+        on si.workerId=wi.workerId
+        left join line_stop lis
+        on si.stopId=lis.stopId
+        where lis.lineId=#{lineId}
+        ORDER BY lis.indexs
+    </select>
+</mapper>

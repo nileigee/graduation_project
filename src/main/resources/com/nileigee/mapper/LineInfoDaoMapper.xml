@@ -1,0 +1,96 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nileigee.dao.LineInfoDao">
+    <resultMap id="lineInfoRM" type="LineInfo" autoMapping="true">
+        <id property="lineId" column="lineId"/>
+        <result property="lineName" column="lineName"/>
+        <result property="lineLength" column="lineLength"/>
+        <result property="lineStartTime" column="lineStartTime"/>
+        <result property="lineEndTime" column="lineEndTime"/>
+        <result property="transferId" column="transferId"/>
+        <result property="workerId" column="workerId"/>
+        <result property="lineStatus" column="lineStatus"/>
+        <result property="lineDescribe" column="lineDescribe"/>
+        <association property="workerInfo" javaType="WorkerInfo" autoMapping="true">
+            <id property="workerId" column="workerId"/>
+            <result property="workerName" column="workerName"/>
+            <result property="workerGender" column="workerGender"/>
+            <result property="workerAge" column="workerAge"/>
+            <result property="workerPhone" column="workerPhone"/>
+            <result property="workerType" column="workerType"/>
+            <result property="workerAddress" column="workerAddress"/>
+            <result property="workerStatus" column="workerStatus"/>
+            <result property="workerDescribe" column="workerDescribe"/>
+        </association>
+        <association property="transferInfo" javaType="TransferInfo" autoMapping="true">
+            <id property="transferId" column="transferId"/>
+            <result property="transferName" column="transferName"/>
+            <result property="transferType" column="transferType"/>
+            <result property="transferLongitude" column="transferLongitude"/>
+            <result property="transferLatitude" column="transferLatitude"/>
+            <result property="transferAddress" column="transferAddress"/>
+            <result property="workerId" column="workerId"/>
+            <result property="transferStatus" column="transferStatus"/>
+            <result property="transferDescribe" column="transferDescribe"/>
+        </association>
+    </resultMap>
+
+    <!--1.根据条件查询站点-->
+    <select id="findLineByCondition" parameterType="java.util.Map" resultMap="lineInfoRM">
+        select * from lineinfo li left join transferinfo ti
+        on li.transferId=ti.transferId left join workerinfo wi
+        on wi.workerId=li.workerId
+        <where>
+            <if test="lineName!=null and lineName != ''">
+                and li.lineName like concat('%',#{lineName},'%')
+            </if>
+            <if test="lineType!=null and lineType != ''">
+                and li.lineType like concat('%',#{lineType},'%')
+            </if>
+            <if test="lineStatus!=null and lineStatus != ''">
+                and li.lineStatus like concat('%',#{lineStatus},'%')
+            </if>
+        </where> LIMIT #{start},#{rows}
+    </select>
+    <!--2.查询总数-->
+    <select id="findTotalCountByCondition" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from lineinfo li left join transferinfo ti
+        on li.transferId=ti.transferId left join workerinfo wi
+        on wi.workerId=li.workerId
+        <where>
+            <if test="lineName!=null and lineName != ''">
+                and li.lineName like concat('%',#{lineName},'%')
+            </if>
+            <if test="lineType!=null and lineType != ''">
+                and li.lineType like concat('%',#{lineType},'%')
+            </if>
+            <if test="lineStatus!=null and lineStatus != ''">
+                and li.lineStatus like concat('%',#{lineStatus},'%')
+            </if>
+        </where>
+    </select>
+    <!--3.添加-->
+    <insert id="saveLine" parameterType="LineInfo">
+        insert into lineinfo(lineName,lineType,lineLength,lineStartTime,lineEndTime,transferId,workerId,lineStatus,lineDescribe)
+        values (#{lineName},#{lineType},#{lineLength},#{lineStartTime},#{lineEndTime},#{transferId},#{workerId},#{lineStatus},#{lineDescribe})
+    </insert>
+    <!--4.修改-->
+    <update id="updateLine" parameterType="LineInfo">
+        update lineinfo
+        set lineName=#{lineName},lineType=#{lineType},lineLength=#{lineLength},lineStartTime=#{lineStartTime},lineEndTime=#{lineEndTime},
+        transferId=#{transferId},workerId=#{workerId},lineStatus=#{lineStatus},lineDescribe=#{lineDescribe}
+        where lineId=#{lineId}
+    </update>
+    <!--5.根据id查路线-->
+    <select id="findLineById" parameterType="java.lang.Integer" resultMap="lineInfoRM">
+        select * from lineinfo li left join transferinfo ti
+        on li.transferId=ti.transferId left join workerinfo wi
+        on wi.workerId=li.workerId
+        where li.lineId=#{lineId}
+    </select>
+    <!--6.删除-->
+    <delete id="deleteLine" parameterType="java.lang.Integer">
+        delete from lineinfo where lineId=#{lineId}
+    </delete>
+</mapper>

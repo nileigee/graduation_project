@@ -1,0 +1,83 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nileigee.dao.TransferInfoDao">
+    <resultMap id="transferInfoRM" type="TransferInfo" autoMapping="true">
+        <id property="transferId" column="transferId"/>
+        <result property="transferName" column="transferName"/>
+        <result property="transferType" column="transferType"/>
+        <result property="transferLongitude" column="transferLongitude"/>
+        <result property="transferLatitude" column="transferLatitude"/>
+        <result property="transferAddress" column="transferAddress"/>
+        <result property="workerId" column="workerId"/>
+        <result property="transferStatus" column="transferStatus"/>
+        <result property="transferDescribe" column="transferDescribe"/>
+        <association property="workerInfo" javaType="WorkerInfo" autoMapping="true">
+            <id property="workerId" column="workerId"/>
+            <result property="workerName" column="workerName"/>
+            <result property="workerAge" column="workerAge"/>
+            <result property="workerPhone" column="workerPhone"/>
+            <result property="workerType" column="workerType"/>
+            <result property="workerAddress" column="workerAddress"/>
+            <result property="workerStatus" column="workerStatus"/>
+        </association>
+    </resultMap>
+
+    <!--1.根据条件查询站点-->
+    <select id="findTransferByCondition" parameterType="java.util.Map" resultMap="transferInfoRM">
+        select * from transferinfo ti left join workerinfo wi
+        on ti.workerId=wi.workerId
+        <where>
+            <if test="transferName!=null and transferName != ''">
+                and ti.transferName like concat('%',#{transferName},'%')
+            </if>
+            <if test="transferType!=null and transferType != ''">
+                and ti.transferType like concat('%',#{transferType},'%')
+            </if>
+            <if test="transferAddress!=null and transferAddress != ''">
+                and ti.transferAddress like concat('%',#{transferAddress},'%')
+            </if>
+        </where> LIMIT #{start},#{rows}
+    </select>
+    <!--2.根据条件查找总数-->
+    <select id="findTotalCountByCondition" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from transferinfo ti left join workerinfo wi
+        on ti.workerId=wi.workerId
+        <where>
+            <if test="transferName!=null and transferName != ''">
+                and ti.transferName like concat('%',#{transferName},'%')
+            </if>
+            <if test="transferType!=null and transferType != ''">
+                and ti.transferType like concat('%',#{transferType},'%')
+            </if>
+            <if test="transferAddress!=null and transferAddress != ''">
+                and ti.transferAddress like concat('%',#{transferAddress},'%')
+            </if>
+        </where>
+    </select>
+    <!--3.添加中转站-->
+    <insert id="saveTransfer" parameterType="TransferInfo">
+        insert into transferinfo(transferName,transferType,transferLongitude,transferLatitude,transferAddress,workerId,transferStatus,transferDescribe)
+        values (#{transferName},#{transferType},#{transferLongitude},#{transferLatitude},#{transferAddress},#{workerId},#{transferStatus},#{transferDescribe})
+    </insert>
+    <!--4.根据id查找中转站-->
+    <select id="findTransferById" parameterType="java.lang.Integer" resultMap="transferInfoRM">
+        select * from transferinfo ti left join workerinfo wi
+        on ti.workerId=wi.workerId
+        where ti.transferId=#{transferId}
+    </select>
+    <!--5.更新中转信息-->
+    <update id="updateTransfer" parameterType="TransferInfo">
+        update transferinfo set transferName=#{transferName},transferType=#{transferType},transferLongitude=#{transferLongitude},transferLatitude=#{transferLatitude},
+        transferAddress=#{transferAddress},workerId=#{workerId},transferStatus=#{transferStatus},transferDescribe=#{transferDescribe}
+        where transferId=#{transferId}
+    </update>
+    <!--6.删除中转站-->
+    <delete id="deleteTransfer" parameterType="java.lang.Integer">
+        delete from transferinfo where transferId=#{transferId}
+    </delete>
+    <select id="findAllTransfers" resultMap="transferInfoRM">
+        select * from transferinfo
+    </select>
+
+</mapper>

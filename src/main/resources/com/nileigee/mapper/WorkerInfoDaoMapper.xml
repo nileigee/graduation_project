@@ -1,0 +1,59 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nileigee.dao.WorkerInfoDao">
+    <!--1.找到所有的司机-->
+    <select id="findAllDriver" parameterType="java.lang.String" resultType="WorkerInfo">
+        select * from workerinfo where workerType=#{workerType}
+    </select>
+    <!--2.根据条件分页查询-->
+    <select id="findWorkerByCondition" parameterType="java.util.Map" resultType="WorkerInfo">
+        select * from workerinfo
+        <where>
+            <if test="workerName!=null and workerName != ''">
+                and workerName like concat('%',#{workerName},'%')
+            </if>
+            <if test="workerPhone!=null and workerPhone != ''">
+                and workerPhone like concat('%',#{workerPhone},'%')
+            </if>
+            <if test="workerType!=null and workerType != ''">
+                and workerType like concat('%',#{workerType},'%')
+            </if>
+        </where> LIMIT #{start},#{rows}
+    </select>
+    <!--3.查询总数-->
+    <select id="findTotalCountByCondition" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from workerinfo
+        <where>
+            <if test="workerName!=null and workerName != ''">
+                and workerName like concat('%',#{workerName},'%')
+            </if>
+            <if test="workerPhone!=null and workerPhone != ''">
+                and workerPhone like concat('%',#{workerPhone},'%')
+            </if>
+            <if test="workerType!=null and workerType != ''">
+                and workerType like concat('%',#{workerType},'%')
+            </if>
+        </where>
+    </select>
+    <!--4.新增工作人员-->
+    <insert id="saveWorker" parameterType="WorkerInfo">
+        insert into workerinfo(workerName,workerGender,workerAge,workerPhone,workerType,workerAddress,workerStatus,workerDescribe)
+        values (#{workerName},#{workerGender},#{workerAge},#{workerPhone},#{workerType},#{workerAddress},#{workerStatus},#{workerDescribe})
+    </insert>
+    <!--5.根据id查询-->
+    <select id="findWorkerById" parameterType="java.lang.Integer" resultType="WorkerInfo">
+        select * from workerinfo
+        where workerId=#{workerId}
+    </select>
+    <!--6.修改-->
+    <update id="updateWorker" parameterType="WorkerInfo">
+        update workerinfo set workerName=#{workerName},workerGender=#{workerGender},workerAge=#{workerAge},workerPhone=#{workerPhone},
+        workerType=#{workerType},workerAddress=#{workerAddress},workerStatus=#{workerStatus},workerDescribe=#{workerDescribe}
+        where workerId=#{workerId}
+    </update>
+    <!--7.删除-->
+    <delete id="deleteWorker" parameterType="java.lang.Integer">
+        delete from workerinfo where workerId=#{workerId}
+    </delete>
+</mapper>

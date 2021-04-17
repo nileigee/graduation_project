@@ -1,0 +1,140 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nileigee.dao.CarInfoDao">
+    <resultMap id="carInfoRM" type="CarInfo" autoMapping="true">
+        <id property="carId" column="carId"/>
+        <result property="carNumber" column="carNumber"/>
+        <result property="carColor" column="carColor"/>
+        <result property="carType" column="carType"/>
+        <result property="carLoad" column="carLoad"/>
+        <result property="workerId" column="workerId"/>
+        <result property="lineId" column="lineId"/>
+        <result property="carStatus" column="carStatus"/>
+        <result property="carDescribe" column="carDescribe"/>
+        <association property="workerInfo" javaType="WorkerInfo" autoMapping="true">
+            <id property="workerId" column="workerId"/>
+            <result property="workerName" column="workerName"/>
+            <result property="workerAge" column="workerAge"/>
+            <result property="workerPhone" column="workerPhone"/>
+            <result property="workerType" column="workerType"/>
+            <result property="workerAddress" column="workerAddress"/>
+            <result property="workerStatus" column="workerStatus"/>
+        </association>
+    </resultMap>
+
+    <!--1.查找车辆列表findCarList-->
+    <select id="findCarList" resultMap="carInfoRM">
+     select * from carinfo ci left join workerinfo wi
+     on ci.workerId=wi.workerId
+    </select>
+    <!--2.保存车辆-->
+    <insert id="saveCar" parameterType="CarInfo">
+        insert into carinfo(carNumber,carColor,carType,carLoad,workerId,lineId,carStatus,carDescribe)
+        values (#{carNumber},#{carColor},#{carType},#{carLoad},#{workerId},#{lineId},#{carStatus},#{carDescribe})
+    </insert>
+    <!--3.根据ID查找车辆-->
+    <select id="findCarById" parameterType="java.lang.Integer" resultMap="carInfoRM">
+        select * from carinfo ci left join workerinfo wi
+        on ci.workerId=wi.workerId where ci.carId=#{carId}
+    </select>
+    <!--4.更新车辆信息-->
+    <update id="updateCar" parameterType="CarInfo">
+        update carinfo set carNumber=#{carNumber},carColor=#{carColor},carType=#{carType},carLoad=#{carLoad},workerId=#{workerId},
+        lineId=#{lineId},carStatus=#{carStatus},carDescribe=#{carDescribe} where carId=#{carId}
+    </update>
+    <!--5.删除某个车辆-->
+    <delete id="deleteCar" parameterType="java.lang.Integer">
+        delete from carinfo where carId=#{carId}
+    </delete>
+    <!--6.根据条件查找车辆-->
+    <select id="findCarByCarNumber" parameterType="CarInfo" resultMap="carInfoRM">
+        select * from carinfo ci left join workerinfo wi
+        on ci.workerId=wi.workerId
+        <where>
+            <if test="carNumber!=null and carNumber != ''">
+                and ci.carNumber=#{carNumber}
+            </if>
+            <if test="carType!=null and carType != ''">
+                and ci.carType=#{carType}
+            </if>
+            <if test="carLoad!=null and carLoad != ''">
+                and ci.carLoad=#{carLoad}
+            </if>
+        </where>
+    </select>
+    <!--7.列表分页-->
+    <select id="findCarByPage" parameterType="java.lang.Integer" resultMap="carInfoRM">
+        select * from carinfo ci left join workerinfo wi
+        on ci.workerId=wi.workerId
+        LIMIT #{start},#{rows}
+    </select>
+    <!--8.查找数据总量-->
+    <select id="findTotalCount" resultType="java.lang.Integer">
+        select count(*) from carinfo ci left join workerinfo wi
+        on ci.workerId=wi.workerId
+    </select>
+    <!--9.根据条件查询车辆的总数-->
+    <select id="findQueryTotalCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from carinfo ci left join workerinfo wi
+        on ci.workerId=wi.workerId
+        <where>
+            <if test="carNumber!=null and carNumber != ''">
+                and ci.carNumber like concat('%',#{carNumber},'%')
+            </if>
+            <if test="carType!=null and carType != ''">
+                and ci.carType like concat('%',#{carType},'%')
+            </if>
+            <if test="carLoad!=null and carLoad != ''">
+                and ci.carLoad like concat('%',#{carLoad},'%')
+            </if>
+        </where>
+    </select>
+    <!--10.根据条件列表分页-->
+    <select id="findCarPageByCondition" parameterType="java.util.Map" resultMap="carInfoRM">
+        select * from carinfo ci left join workerinfo wi
+        on ci.workerId=wi.workerId
+        <where>
+            <if test="carNumber!=null and carNumber != ''">
+                and ci.carNumber like concat('%',#{carNumber},'%')
+            </if>
+            <if test="carType!=null and carType != ''">
+                and ci.carType like concat('%',#{carType},'%')
+            </if>
+            <if test="carLoad!=null and carLoad != ''">
+                and ci.carLoad like concat('%',#{carLoad},'%')
+            </if>
+        </where> LIMIT #{start},#{rows}
+    </select>
+    <!--11.查找相同线路的车辆的总数-->
+    <select id="findTotalCountByLineId" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from carinfo ci
+        left join workerinfo wi
+        on ci.workerId=wi.workerId
+		where ci.lineId=#{lineId}
+    </select>
+    <!--12.查找相同线路的车辆-->
+    <select id="findCarsByLineId" parameterType="java.util.Map" resultMap="carInfoRM">
+        select * from carinfo ci
+        left join workerinfo wi
+        on ci.workerId=wi.workerId
+        <where>
+            <if test="carNumber!=null and carNumber != ''">
+                and ci.carNumber like concat('%',#{carNumber},'%')
+            </if>
+            <if test="carType!=null and carType != ''">
+                and ci.carType like concat('%',#{carType},'%')
+            </if>
+            <if test="carLoad!=null and carLoad != ''">
+                and ci.carLoad like concat('%',#{carLoad},'%')
+            </if>
+                and ci.lineId=#{lineId}
+        </where>
+		LIMIT #{start},#{rows}
+    </select>
+    <!--13.把车辆从路线中删除或加入某线路-->
+    <update id="lineRemoveOrJoinCar" parameterType="java.lang.Integer">
+        update carinfo set lineId=#{lineId}
+        where carId=#{carId}
+    </update>
+</mapper>
